@@ -1,5 +1,5 @@
-import { createMod } from "@fruit-pie/sdk";
-import { initText } from "@fruit-pie/text";
+import { createMod } from "@sculptr/sdk";
+import { initText } from "@sculptr/text";
 
 // Import sprites
 import cherry0 from "./sprites/cherry-0.png?inline";
