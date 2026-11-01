@@ -1,0 +1,33 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  check:
+    # Pull requests from forks never get the self-hosted runner.
+    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-latest' || vars.RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # shortcut: @sculptr/sdk and @sculptr/text are not on npm yet, so `npm ci` cannot resolve them and
+      # this builds them from sculptr-sdk and sculptr-text main instead,
+      # delete once @sculptr/* is published and put `npm ci` back.
+      - name: Install @sculptr/sdk and @sculptr/text from main
+        env:
+          GIT_CONFIG_COUNT: 1
+          GIT_CONFIG_KEY_0: url.git@github.com:QuentinJanuel/.insteadOf
+          GIT_CONFIG_VALUE_0: https://github.com/QuentinJanuel/
+        run: |
+          rm -rf "$RUNNER_TEMP/sculptr-sdk" "$RUNNER_TEMP/sculptr-text" "$RUNNER_TEMP"/sculptr-*.tgz
+          git clone --depth 1 https://github.com/QuentinJanuel/sculptr-sdk.git "$RUNNER_TEMP/sculptr-sdk"
+          git clone --depth 1 https://github.com/QuentinJanuel/sculptr-text.git "$RUNNER_TEMP/sculptr-text"
+          (cd "$RUNNER_TEMP/sculptr-sdk" && npm ci && npm run build && npm pack --pack-destination "$RUNNER_TEMP")
+          # text builds against @sculptr/sdk, so it gets the sdk tarball first.
+          (cd "$RUNNER_TEMP/sculptr-text" && npm install --no-save "$RUNNER_TEMP"/sculptr-sdk-*.tgz && npm run build && npm pack --pack-destination "$RUNNER_TEMP")
+          npm install --no-save "$RUNNER_TEMP"/sculptr-sdk-*.tgz "$RUNNER_TEMP"/sculptr-text-*.tgz
+      - run: npm run typecheck
+      - run: npm run build

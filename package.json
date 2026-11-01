@@ -1,8 +1,8 @@
 {
-  "name": "my-fruit-pie-mod",
+  "name": "my-sculptr-mod",
   "version": "1.0.0",
   "displayName": "My Mod",
-  "description": "A Fruit Pie mod.",
+  "description": "A sculptr mod.",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
     "vite": "^8.3.0"
   },
   "dependencies": {
-    "@fruit-pie/sdk": "^2.17.0",
-    "@fruit-pie/text": "^1.3.0"
+    "@sculptr/sdk": "^2.17.0",
+    "@sculptr/text": "^1.3.0"
   }
 }
